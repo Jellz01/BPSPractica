@@ -29,8 +29,12 @@ def manejar_cliente(conn, addr):
                 respuesta = "Has seleccionado 'Leer archivo'. Escribe: FILE nombre_archivo.txt"
             elif data == "5":
                 respuesta = "Has seleccionado 'Login'. Escribe: usuario:clave"
+            elif data == "6":
+                respuesta = "Has seleccionado 'Crear archivo'. Escribe: CREATE nombre_archivo.txt contenido"
             elif data == "0":
                 respuesta = "Gracias por usar el sistema. Hasta luego."
+                conn.sendall((respuesta + '\n').encode())
+                break
 
             # Comandos reales
             elif data == "GET TIME":
@@ -52,6 +56,19 @@ def manejar_cliente(conn, addr):
                         respuesta = f.read(500)  # Máx 500 caracteres
                 else:
                     respuesta = "Archivo no encontrado."
+
+            elif data.startswith("CREATE "):
+                try:
+                    partes = data[7:].strip().split(" ", 1)
+                    if len(partes) != 2:
+                        respuesta = "Formato incorrecto. Usa: CREATE nombre_archivo.txt contenido"
+                    else:
+                        nombre_archivo, contenido = partes
+                        with open(nombre_archivo, "w") as f:
+                            f.write(contenido)
+                        respuesta = f"Archivo '{nombre_archivo}' creado correctamente."
+                except Exception as e:
+                    respuesta = f"Error al crear archivo: {e}"
 
             elif ":" in data:  # Login
                 user, pwd = data.split(":", 1)
